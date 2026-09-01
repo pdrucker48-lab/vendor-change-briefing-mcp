@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { callTool, DEMO_BRIEFING, toolDefinitions } from './tools.js';
+import { callTool, DEMO_BRIEFING, explainDemoChange, toolDefinitions } from './tools.js';
 
 export const PROTOCOL_VERSION = '2025-11-25';
 const MAX_BODY_BYTES = 1_000_000;
@@ -74,6 +74,9 @@ export function createVendorBriefingServer(options = {}) {
             }
             if (request.method === 'GET' && url.pathname === '/api/demo-briefing') {
                 return writeJson(response, 200, DEMO_BRIEFING);
+            }
+            if (request.method === 'GET' && url.pathname === '/api/demo-follow-up') {
+                return writeJson(response, 200, explainDemoChange(url.searchParams.get('vendor')));
             }
             if (url.pathname !== '/mcp') return writeJson(response, 404, { error: 'Not found' });
 

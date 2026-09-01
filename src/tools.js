@@ -13,6 +13,7 @@ export const DEMO_BRIEFING = {
             materiality: 'high',
             categories: ['pricing/billing'],
             evidence: 'A new fee-adjustment clause was added.',
+            whyItMatters: 'Fee-adjustment language can change operating costs outside a normal renewal cycle.',
             recommendedAction: 'Ask procurement to confirm the effective date and affected products.',
         },
         {
@@ -21,6 +22,7 @@ export const DEMO_BRIEFING = {
             materiality: 'medium',
             categories: ['data retention'],
             evidence: 'Retention language now distinguishes backups from active records.',
+            whyItMatters: 'Backup-retention wording can affect deletion commitments and privacy obligations.',
             recommendedAction: 'Review whether the backup-retention period matches the vendor-risk record.',
         },
     ],
@@ -45,6 +47,19 @@ export const toolDefinitions = [
                 checksPerMonth: { type: 'integer', minimum: 1, maximum: 1000 },
             },
             required: ['pages', 'checksPerMonth'],
+        },
+    },
+    {
+        name: 'explain_demo_change',
+        title: 'Explain a Vendor Change',
+        description: 'Answer a follow-up question about why one vendor change matters and what a reviewer should do next.',
+        inputSchema: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+                vendor: { type: 'string', enum: DEMO_BRIEFING.changes.map((change) => change.vendor) },
+            },
+            required: ['vendor'],
         },
     },
     {
@@ -85,9 +100,25 @@ function toolResult(value, isError = false) {
     };
 }
 
+export function explainDemoChange(vendor) {
+    const normalized = String(vendor || '').trim().toLowerCase();
+    const change = DEMO_BRIEFING.changes.find((item) => item.vendor.toLowerCase() === normalized);
+    if (!change) throw new Error('vendor must match a vendor in the current briefing');
+    return {
+        vendor: change.vendor,
+        document: change.document,
+        materiality: change.materiality,
+        evidence: change.evidence,
+        whyItMatters: change.whyItMatters,
+        recommendedAction: change.recommendedAction,
+    };
+}
+
 export async function callTool(name, args = {}, options = {}) {
     try {
         if (name === 'get_demo_briefing') return toolResult(DEMO_BRIEFING);
+
+        if (name === 'explain_demo_change') return toolResult(explainDemoChange(args.vendor));
 
         if (name === 'estimate_monitoring_cost') {
             const pages = Number(args.pages);

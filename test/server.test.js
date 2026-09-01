@@ -40,7 +40,7 @@ test('lists and calls the deterministic tools', async () => withServer(async (ba
         body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }),
     });
     const listed = await list.json();
-    assert.deepEqual(listed.result.tools.map((tool) => tool.name), ['get_demo_briefing', 'estimate_monitoring_cost', 'check_vendor_policies']);
+    assert.deepEqual(listed.result.tools.map((tool) => tool.name), ['get_demo_briefing', 'estimate_monitoring_cost', 'explain_demo_change', 'check_vendor_policies']);
 
     const call = await fetch(`${base}/mcp`, {
         method: 'POST', headers: mcpHeaders,
@@ -49,6 +49,13 @@ test('lists and calls the deterministic tools', async () => withServer(async (ba
     const called = await call.json();
     assert.equal(called.result.structuredContent.pageChecks, 15000);
     assert.equal(called.result.structuredContent.grossCostUsd, 60);
+
+    const followUp = await fetch(`${base}/mcp`, {
+        method: 'POST', headers: mcpHeaders,
+        body: JSON.stringify({ jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'explain_demo_change', arguments: { vendor: 'Stripe' } } }),
+    });
+    const explained = await followUp.json();
+    assert.match(explained.result.structuredContent.whyItMatters, /operating costs/);
 }));
 
 test('returns a safe tool error when live Apify credentials are absent', async () => withServer(async (base) => {
@@ -70,4 +77,22 @@ test('rejects untrusted browser origins and unsupported GET streams', async () =
     assert.equal(blocked.status, 403);
     const get = await fetch(`${base}/mcp`, { headers: { accept: 'text/event-stream' } });
     assert.equal(get.status, 405);
+}));
+
+test('homepage links the demo to the paid monitoring workflow', async () => withServer(async (base) => {
+    const response = await fetch(`${base}/`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /\$0\.004/);
+    assert.match(html, /apify\.com\/peterdrucker481\/policy-change-monitor/);
+    assert.match(html, /enterprise-vendor-policy-pack/);
+}));
+
+test('demo supports evidence-backed follow-up questions', async () => withServer(async (base) => {
+    const response = await fetch(`${base}/api/demo-follow-up?vendor=Stripe`);
+    assert.equal(response.status, 200);
+    const detail = await response.json();
+    assert.equal(detail.vendor, 'Stripe');
+    assert.match(detail.whyItMatters, /operating costs/);
+    assert.match(detail.recommendedAction, /procurement/);
 }));
