@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vendor Change Briefing</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">SIMULATED ALEXA+ EXPERIENCE</p>
+      <h1>What changed in our critical vendors this week?</h1>
+      <p class="subhead">A calm, evidence-backed briefing for procurement, privacy, and vendor-risk teams.</p>
+      <button id="brief">Start briefing</button>
+    </section>
+    <section id="conversation" class="conversation" aria-live="polite" hidden>
+      <div class="user"><span>You</span><p>Alexa, brief me on vendor policy changes.</p></div>
+      <div class="alexa"><span>Alexa+</span><p id="summary">Checking the monitored vendor portfolio…</p></div>
+      <div id="changes" class="cards"></div>
+      <p class="evidence">Each alert preserves the source URL, timestamps, content hashes, and exact before-and-after clauses through Policy Change Monitor on Apify.</p>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

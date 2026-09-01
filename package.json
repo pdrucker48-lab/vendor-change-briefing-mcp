@@ -1,0 +1,14 @@
+{
+  "name": "vendor-change-briefing-mcp",
+  "version": "0.1.0",
+  "description": "Alexa+ MCP prototype for concise vendor policy change briefings backed by Apify.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  }
+}
